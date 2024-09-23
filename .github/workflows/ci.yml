@@ -1,39 +1,32 @@
-name: Node.js CI
+name: Build
 
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
-    branches:
-      - main
+    types: [opened, synchronize, reopened]
 
 jobs:
-  build:
+  sonarcloud:
+    name: SonarCloud
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [16.x]
-
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Use Node.js ${{ matrix.node-version }}
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Clones superficiales deshabilitados para mejorar la relevancia del análisis
+          
+      - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '16'
 
       - run: npm install
 
-      - run: npm test
+      - run: npm test  # Este paso es opcional si tienes pruebas
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v1
+        uses: SonarSource/sonarcloud-github-action@master
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Necesario para obtener la información del PR, si existe
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.projectKey=tu-usuario_node-sonarcloud-test
-            -Dsonar.organization=tu-organizacion
-            -Dsonar.host.url=https://sonarcloud.io
