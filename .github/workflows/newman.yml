@@ -1,19 +1,24 @@
 name: Run Newman Tests
 
 on:
-  push:
-    branches:
-      - develop
-      - staging
+  pull_request:
+    types:
+      - closed
 
 jobs:
   newman-tests:
-    
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Debug Files
+        run: ls -R
+
+      - name: Ensure Postman Collection Exists
+        run: test -f PlaceAnalyzer.postman_collection.json && echo "File exists" || echo "File missing!"
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -27,9 +32,6 @@ jobs:
         run: |
           npm install -g newman
           npm install -g newman-reporter-htmlextra
-
-      - name: List Files in Working Directory
-        run: ls -la
 
       - name: Run Newman tests with htmlextra reporter
         run: |
