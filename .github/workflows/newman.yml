@@ -1,9 +1,7 @@
 name: Run Newman Tests
 
 on:
-  pull_request:
-    types:
-      - closed
+  push:
     branches:
       - develop
       - staging
